@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_blue">#1976D2</color>
+    <color name="primary_blue_dark">#1565C0</color>
+    <color name="primary_blue_light">#E3F2FD</color>
+    <color name="primary_red">#D32F2F</color>
+    <color name="primary_red_dark">#C62828</color>
+    <color name="primary_red_light">#FFCDD2</color>
+    <color name="colorPrimary">@color/primary_blue</color>
+    <color name="colorPrimaryDark">@color/primary_blue_dark</color>
+    <color name="colorAccent">@color/primary_red</color>
+</resources>
+
+
+
+
+

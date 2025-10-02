@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_settings"
+        android:title="Settings"
+        android:icon="@drawable/ic_settings" />
+    <item
+        android:id="@+id/nav_license"
+        android:title="License"
+        android:icon="@drawable/ic_license" />
+    <item
+        android:id="@+id/nav_support"
+        android:title="Support"
+        android:icon="@drawable/ic_help" />
+    <item
+        android:id="@+id/nav_exit"
+        android:title="Exit"
+        android:icon="@drawable/ic_exit" />
+</menu>
+
+
+
+
+

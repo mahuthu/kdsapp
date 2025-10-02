@@ -1,0 +1,4 @@
+com.passoassist.app.test.app-androidTest-0 /home/mahuthu/Desktop/passo assist/app/build/generated/res/resValues/androidTest/debug
+com.passoassist.app.test.app-mergeDebugAndroidTestResources-1 /home/mahuthu/Desktop/passo assist/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.passoassist.app.test.app-mergeDebugAndroidTestResources-2 /home/mahuthu/Desktop/passo assist/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.passoassist.app.test.app-debugAndroidTest-3 /home/mahuthu/Desktop/passo assist/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
