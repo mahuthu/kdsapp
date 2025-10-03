@@ -2,6 +2,7 @@ package com.passoassist.app
 
 import android.Manifest
 import android.content.SharedPreferences
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -76,6 +77,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setupWebView()
         setupFABs()
         loadSavedUrl()
+
+        // Start polling service
+        startService(Intent(this, PollingService::class.java))
     }
 
     private fun initializeViews() {
@@ -301,10 +305,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showExitDialog() {
         AlertDialog.Builder(this)
-            .setTitle("Exit App")
-            .setMessage("Are you sure you want to exit PassoAssist?")
-            .setPositiveButton("Exit") { _, _ -> finish() }
-            .setNegativeButton("Cancel", null)
+            .setTitle(getString(R.string.exit_app_title))
+            .setMessage(getString(R.string.exit_app_message))
+            .setPositiveButton(getString(R.string.exit)) { _, _ -> finish() }
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 

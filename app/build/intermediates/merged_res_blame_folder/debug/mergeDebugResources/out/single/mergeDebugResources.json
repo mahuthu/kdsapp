@@ -4,20 +4,36 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher_foreground.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher.webp"
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher_foreground.webp"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_logo_circle.xml.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/logo_circle.xml"
     },
     {
-        "merged": "com.passoassist.app-debug-48:/mipmap-hdpi_ic_launcher_round.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher_round.webp"
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_activity_main.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_qr_code.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_qr_code.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_settings.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_settings.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_exit.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_exit.xml"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/xml_network_security_config.xml.flat",
@@ -28,20 +44,40 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo3.png"
     },
     {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.passoassist.app-debug-48:/layout_fragment_settings.xml.flat",
+        "source": "com.passoassist.app-main-50:/layout/fragment_settings.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo1.png.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo1.png"
+    },
+    {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_refresh.xml.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_refresh.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_help.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_help.xml"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
     },
     {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher.webp"
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_nav_header.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/nav_header.xml"
     },
     {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_itec.png.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/itec.png"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_launcher_background.xml.flat",
@@ -64,124 +100,20 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xxhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher.webp"
-    },
-    {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo4.png.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo4.png"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_logo_header.png.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/logo_header.png"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_fragment_license.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/fragment_license.xml"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher_foreground.webp"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xxhdpi/ic_launcher_foreground.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher_foreground.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_activity_main.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/activity_main.xml"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_qr_code.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_qr_code.xml"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher_foreground.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_settings.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_settings.xml"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_exit.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_exit.xml"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-anydpi-v26/ic_launcher.xml"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo1.png.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo1.png"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_help.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/ic_help.xml"
-    },
-    {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_nav_header.xml.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/nav_header.xml"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xxhdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/drawable_itec.png.flat",
-        "source": "com.passoassist.app-main-50:/drawable/itec.png"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher.webp"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/menu_nav_menu.xml.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/menu/nav_menu.xml"
     },
     {
-        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo2.png.flat",
-        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo2.png"
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher_round.webp"
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo2.png.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo2.png"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
@@ -192,6 +124,10 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher.webp"
     },
     {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_logo_header.png.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/logo_header.png"
+    },
+    {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_fragment_settings.xml.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/fragment_settings.xml"
     },
@@ -200,8 +136,20 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-hdpi/ic_launcher_round.webp"
     },
     {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/layout_fragment_license.xml.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/fragment_license.xml"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo.png.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo.png"
+    },
+    {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher.webp"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_ic_launcher_foreground.xml.flat",
@@ -212,15 +160,11 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher_foreground.webp"
     },
     {
+        "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-debug-48:/drawable_passo_logo5.png.flat",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/drawable/passo_logo5.png"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-xxhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "com.passoassist.app-debug-48:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.passoassist.app-main-50:/mipmap-mdpi/ic_launcher_foreground.webp"
     }
 ]

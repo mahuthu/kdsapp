@@ -11,6 +11,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.textfield.TextInputEditText;
@@ -36,6 +37,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final Button btnSaveBaseUrl;
 
   @NonNull
+  public final Button btnSelectSound;
+
+  @NonNull
+  public final Button btnTestPrint;
+
+  @NonNull
   public final CheckBox chkAdvanced;
 
   @NonNull
@@ -45,7 +52,16 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final TextInputEditText editDomain;
 
   @NonNull
+  public final TextInputEditText editPaperWidth;
+
+  @NonNull
+  public final TextInputEditText editPollingInterval;
+
+  @NonNull
   public final TextInputEditText editPort;
+
+  @NonNull
+  public final TextInputEditText editPrinterMac;
 
   @NonNull
   public final TextInputEditText editProtocol;
@@ -53,23 +69,44 @@ public final class FragmentSettingsBinding implements ViewBinding {
   @NonNull
   public final TextView settingsText;
 
+  @NonNull
+  public final SwitchCompat switchSound;
+
+  @NonNull
+  public final SwitchCompat switchVendorPrinter;
+
+  @NonNull
+  public final TextView txtSelectedSound;
+
   private FragmentSettingsBinding(@NonNull ScrollView rootView,
       @NonNull LinearLayout advancedContainer, @NonNull Button btnBuildFromParts,
       @NonNull Button btnClearBaseUrl, @NonNull Button btnSaveBaseUrl,
-      @NonNull CheckBox chkAdvanced, @NonNull TextInputEditText editBaseUrl,
-      @NonNull TextInputEditText editDomain, @NonNull TextInputEditText editPort,
-      @NonNull TextInputEditText editProtocol, @NonNull TextView settingsText) {
+      @NonNull Button btnSelectSound, @NonNull Button btnTestPrint, @NonNull CheckBox chkAdvanced,
+      @NonNull TextInputEditText editBaseUrl, @NonNull TextInputEditText editDomain,
+      @NonNull TextInputEditText editPaperWidth, @NonNull TextInputEditText editPollingInterval,
+      @NonNull TextInputEditText editPort, @NonNull TextInputEditText editPrinterMac,
+      @NonNull TextInputEditText editProtocol, @NonNull TextView settingsText,
+      @NonNull SwitchCompat switchSound, @NonNull SwitchCompat switchVendorPrinter,
+      @NonNull TextView txtSelectedSound) {
     this.rootView = rootView;
     this.advancedContainer = advancedContainer;
     this.btnBuildFromParts = btnBuildFromParts;
     this.btnClearBaseUrl = btnClearBaseUrl;
     this.btnSaveBaseUrl = btnSaveBaseUrl;
+    this.btnSelectSound = btnSelectSound;
+    this.btnTestPrint = btnTestPrint;
     this.chkAdvanced = chkAdvanced;
     this.editBaseUrl = editBaseUrl;
     this.editDomain = editDomain;
+    this.editPaperWidth = editPaperWidth;
+    this.editPollingInterval = editPollingInterval;
     this.editPort = editPort;
+    this.editPrinterMac = editPrinterMac;
     this.editProtocol = editProtocol;
     this.settingsText = settingsText;
+    this.switchSound = switchSound;
+    this.switchVendorPrinter = switchVendorPrinter;
+    this.txtSelectedSound = txtSelectedSound;
   }
 
   @Override
@@ -123,6 +160,18 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_select_sound;
+      Button btnSelectSound = ViewBindings.findChildViewById(rootView, id);
+      if (btnSelectSound == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_test_print;
+      Button btnTestPrint = ViewBindings.findChildViewById(rootView, id);
+      if (btnTestPrint == null) {
+        break missingId;
+      }
+
       id = R.id.chk_advanced;
       CheckBox chkAdvanced = ViewBindings.findChildViewById(rootView, id);
       if (chkAdvanced == null) {
@@ -141,9 +190,27 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.edit_paper_width;
+      TextInputEditText editPaperWidth = ViewBindings.findChildViewById(rootView, id);
+      if (editPaperWidth == null) {
+        break missingId;
+      }
+
+      id = R.id.edit_polling_interval;
+      TextInputEditText editPollingInterval = ViewBindings.findChildViewById(rootView, id);
+      if (editPollingInterval == null) {
+        break missingId;
+      }
+
       id = R.id.edit_port;
       TextInputEditText editPort = ViewBindings.findChildViewById(rootView, id);
       if (editPort == null) {
+        break missingId;
+      }
+
+      id = R.id.edit_printer_mac;
+      TextInputEditText editPrinterMac = ViewBindings.findChildViewById(rootView, id);
+      if (editPrinterMac == null) {
         break missingId;
       }
 
@@ -159,9 +226,29 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.switch_sound;
+      SwitchCompat switchSound = ViewBindings.findChildViewById(rootView, id);
+      if (switchSound == null) {
+        break missingId;
+      }
+
+      id = R.id.switch_vendor_printer;
+      SwitchCompat switchVendorPrinter = ViewBindings.findChildViewById(rootView, id);
+      if (switchVendorPrinter == null) {
+        break missingId;
+      }
+
+      id = R.id.txt_selected_sound;
+      TextView txtSelectedSound = ViewBindings.findChildViewById(rootView, id);
+      if (txtSelectedSound == null) {
+        break missingId;
+      }
+
       return new FragmentSettingsBinding((ScrollView) rootView, advancedContainer,
-          btnBuildFromParts, btnClearBaseUrl, btnSaveBaseUrl, chkAdvanced, editBaseUrl, editDomain,
-          editPort, editProtocol, settingsText);
+          btnBuildFromParts, btnClearBaseUrl, btnSaveBaseUrl, btnSelectSound, btnTestPrint,
+          chkAdvanced, editBaseUrl, editDomain, editPaperWidth, editPollingInterval, editPort,
+          editPrinterMac, editProtocol, settingsText, switchSound, switchVendorPrinter,
+          txtSelectedSound);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -109,6 +109,89 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#BDBDBD"
+            android:layout_marginTop="16dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/polling_interval_label"
+            android:layout_marginTop="12dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_polling_interval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:singleLine="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_sound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_alert_toggle"
+            android:layout_marginTop="12dp"/>
+
+        <Button
+            android:id="@+id/btn_select_sound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_sound"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/txt_selected_sound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_selected"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="4dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/printer_mac_hint"
+            android:layout_marginTop="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_printer_mac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:singleLine="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/paper_width"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_paper_width"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="58"
+                android:singleLine="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btn_test_print"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/test_print"
+            android:layout_marginTop="8dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_vendor_printer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/use_vendor_printer"
+            android:layout_marginTop="8dp"/>
+
     </LinearLayout>
 </ScrollView>
 
