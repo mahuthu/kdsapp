@@ -8,15 +8,15 @@
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/activity_main.xml"
     },
     {
-        "merged": "com.passoassist.app-mergeDebugResources-47:/layout/fragment_settings.xml",
-        "source": "com.passoassist.app-main-50:/layout/fragment_settings.xml"
-    },
-    {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-mergeDebugResources-47:/layout/nav_header.xml",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/nav_header.xml"
     },
     {
         "merged": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-mergeDebugResources-47:/layout/fragment_license.xml",
         "source": "/home/mahuthu/.gradle/daemon/8.9/com.passoassist.app-main-50:/layout/fragment_license.xml"
+    },
+    {
+        "merged": "com.passoassist.app-mergeDebugResources-47:/layout/nav_header.xml",
+        "source": "com.passoassist.app-main-50:/layout/nav_header.xml"
     }
 ]

@@ -29,12 +29,14 @@ class PollingService : Service() {
     private val gson = Gson()
     private var timer: Timer? = null
     private val failureStreak = AtomicInteger(0)
+    private val seenSerials: MutableSet<String> = java.util.Collections.synchronizedSet(mutableSetOf())
 
     override fun onCreate() {
         super.onCreate()
         prefs = getSharedPreferences("PassoAssistPrefs", Context.MODE_PRIVATE)
         api = ApiClient.getInstance(this)
         printer = PrinterManager(this)
+        loadSeenSerials()
         createNotificationChannel()
         startForeground(1, buildNotification("Waiting for jobs"))
     }
@@ -82,30 +84,52 @@ class PollingService : Service() {
                         val orders: List<OrderJob>? = runCatching { gson.fromJson<List<OrderJob>>(body, ordersType) }.getOrNull()
                         if (!orders.isNullOrEmpty()) {
                             Log.i("PollingService", "parsed OrderJob list size=${orders.size}")
-                            notifyNewJobs(orders.size)
-                            orders.forEach { o ->
+                            val newOrders = orders.filter { (it.InternalDispatchSerial ?: it.SalesOrderSerial).isNullOrBlank().not() }
+                                .filter { isNewSerial((it.InternalDispatchSerial ?: it.SalesOrderSerial)!!) }
+                            if (newOrders.isNotEmpty()) notifyNewJobs(newOrders.size)
+                            newOrders.forEach { o ->
                                 val serial = o.InternalDispatchSerial ?: o.SalesOrderSerial ?: ""
+                                postPrintActionNotification(o)
                                 val success = printer.printOrder(o)
                                 if (serial.isNotBlank()) sendAck(baseUrl, serial, success)
+                                markSeen(serial)
                             }
                         } else if (body.trimStart().startsWith("{")) {
                             val single: OrderJob? = runCatching { gson.fromJson(body, OrderJob::class.java) }.getOrNull()
                             if (single != null) {
                                 Log.i("PollingService", "parsed single OrderJob")
-                                notifyNewJobs(1)
                                 val serial = single.InternalDispatchSerial ?: single.SalesOrderSerial ?: ""
-                                val success = printer.printOrder(single)
-                                if (serial.isNotBlank()) sendAck(baseUrl, serial, success)
+                                if (serial.isNotBlank() && isNewSerial(serial)) {
+                                    notifyNewJobs(1)
+                                    postPrintActionNotification(single)
+                                    val success = printer.printOrder(single)
+                                    sendAck(baseUrl, serial, success)
+                                    markSeen(serial)
+                                }
                             }
                         } else {
                             val listType = object : TypeToken<List<PrintJob>>() {}.type
                             val jobs: List<PrintJob> = gson.fromJson(body, listType) ?: emptyList()
                             Log.i("PollingService", "parsed simple jobs size=${jobs.size}")
                             if (jobs.isEmpty()) return
-                            notifyNewJobs(jobs.size)
-                            jobs.forEach { job ->
+                            val newJobs = jobs.filter { isNewSerial(it.internaldispatchserial) }
+                            if (newJobs.isNotEmpty()) notifyNewJobs(newJobs.size)
+                            newJobs.forEach { job ->
+                                postPrintActionNotification(
+                                    OrderJob(
+                                        SalesOrderSerial = job.internaldispatchserial,
+                                        PersonnelName = null,
+                                        InternalDispatchSerial = job.internaldispatchserial,
+                                        SequenceNumber = null,
+                                        AddedTime = null,
+                                        BranchName = getString(R.string.app_name),
+                                        ItemsCount = 1,
+                                        StatusTitle = StatusTitle(null, job.content, null, 1, null, null)
+                                    )
+                                )
                                 val success = printer.print(job)
                                 sendAck(baseUrl, job.internaldispatchserial, success)
+                                markSeen(job.internaldispatchserial)
                             }
                         }
                         failureStreak.set(0)
@@ -126,18 +150,56 @@ class PollingService : Service() {
     private fun sendAck(baseUrl: String, serial: String, success: Boolean) {
         val ackUrl = HttpUrlHelper.join(baseUrl, "/kictchen/endpoints/update_kds_print.jsp")
         val payload = AckResponse(if (success) "success" else "failure", serial)
-        api.postJson(ackUrl, gson.toJson(payload)).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) { }
-            override fun onResponse(call: Call, response: Response) { response.close() }
+        val json = gson.toJson(payload)
+        Log.i("PollingService", "ack -> $ackUrl body=$json")
+        api.postJson(ackUrl, json).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.w("PollingService", "ack failed: ${e.message}")
+            }
+            override fun onResponse(call: Call, response: Response) {
+                Log.i("PollingService", "ack <- code=${response.code}")
+                response.close()
+            }
         })
     }
 
     private fun notifyNewJobs(count: Int) {
-        if (!prefs.getBoolean("sound_enabled", true)) return
-        val soundUri = prefs.getString("sound_uri", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString())
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notification = buildNotification("$count new print job(s)", soundUri)
-        nm.notify(2, notification)
+        val soundUri = prefs.getString("sound_uri", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString())
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("$count new print job(s)")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+        if (prefs.getBoolean("sound_enabled", true) && soundUri != null) {
+            builder.setSound(android.net.Uri.parse(soundUri))
+        }
+        nm.notify(2, builder.build())
+    }
+
+    private fun postPrintActionNotification(order: OrderJob) {
+        val title = (order.BranchName ?: getString(R.string.app_name)).ifBlank { getString(R.string.app_name) }
+        val name = order.StatusTitle?.ProductName?.ifBlank { null } ?: "Order"
+        val qty = order.StatusTitle?.Quantity ?: order.ItemsCount ?: 1
+        val body = buildString {
+            append(name).append(" x").append(qty)
+            val serial = order.InternalDispatchSerial ?: order.SalesOrderSerial
+            if (!serial.isNullOrBlank()) append("  (#").append(serial).append(")")
+        }
+
+        val intent = PrintActivity.createIntent(this, title, body)
+        val pi = PendingIntent.getActivity(this, (System.currentTimeMillis() % Int.MAX_VALUE).toInt(), intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setContentText(body)
+            .addAction(0, "Print", pi)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+        nm.notify((System.currentTimeMillis() % Int.MAX_VALUE).toInt(), builder.build())
     }
 
     private fun buildNotification(text: String, soundUri: String? = null): Notification {
@@ -162,6 +224,37 @@ class PollingService : Service() {
             val channel = NotificationChannel(CHANNEL_ID, "Passo KDS", NotificationManager.IMPORTANCE_LOW)
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.createNotificationChannel(channel)
+        }
+    }
+
+    private fun isNewSerial(serial: String): Boolean {
+        return !seenSerials.contains(serial)
+    }
+
+    private fun markSeen(serial: String) {
+        seenSerials.add(serial)
+        persistSeenSerials()
+    }
+
+    private fun loadSeenSerials() {
+        val csv = prefs.getString("seen_serials", null) ?: return
+        csv.split(',').map { it.trim() }.filter { it.isNotEmpty() }.forEach { seenSerials.add(it) }
+        // keep only last 200 serials to bound storage
+        trimSeen()
+    }
+
+    private fun persistSeenSerials() {
+        trimSeen()
+        prefs.edit().putString("seen_serials", seenSerials.joinToString(",")).apply()
+    }
+
+    private fun trimSeen() {
+        if (seenSerials.size > 200) {
+            // naive trim: keep latest by insertion order not guaranteed for HashSet, so rebuild from last 200 of list
+            val list = seenSerials.toList()
+            val last = list.drop(list.size - 200)
+            seenSerials.clear()
+            seenSerials.addAll(last)
         }
     }
 

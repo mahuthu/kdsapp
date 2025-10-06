@@ -66,6 +66,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.passoassist.app.PrintActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:clearTaskOnLaunch="true"
             android:screenOrientation="portrait"
