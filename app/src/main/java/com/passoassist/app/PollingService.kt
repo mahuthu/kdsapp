@@ -8,6 +8,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
+import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -278,14 +280,15 @@ class PollingService : Service() {
     private fun notifyNewJobs(count: Int) {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val soundUri = prefs.getString("sound_uri", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString())
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) getOrCreateAlertChannelId() else CHANNEL_ID
+        val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(getString(R.string.app_name))
             .setContentText("$count new print job(s)")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-        if (prefs.getBoolean("sound_enabled", true) && soundUri != null) {
-            builder.setSound(android.net.Uri.parse(soundUri))
+        if (prefs.getBoolean("sound_enabled", true) && soundUri != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            builder.setSound(Uri.parse(soundUri))
         }
         nm.notify(2, builder.build())
     }
@@ -306,7 +309,8 @@ class PollingService : Service() {
         val pi = PendingIntent.getActivity(this, serial.hashCode(), intent, PendingIntent.FLAG_IMMUTABLE)
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) getOrCreateAlertChannelId() else CHANNEL_ID
+        val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText("Tap to print: $body")
@@ -314,6 +318,10 @@ class PollingService : Service() {
             .addAction(0, "Print", pi) // Keep the action button as well
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+        val soundUri = prefs.getString("sound_uri", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString())
+        if (prefs.getBoolean("sound_enabled", true) && soundUri != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            builder.setSound(Uri.parse(soundUri))
+        }
         nm.notify(serial.hashCode(), builder.build())
         
         Log.d("PollingService", "Notification posted with ID: ${serial.hashCode()}")
@@ -338,13 +346,40 @@ class PollingService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "Passo KDS", NotificationManager.IMPORTANCE_HIGH)
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel(CHANNEL_ID, "Passo KDS Foreground", NotificationManager.IMPORTANCE_LOW)
             channel.enableLights(true)
             channel.enableVibration(true)
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            channel.setSound(null, null) // Foreground channel should not play sounds
             nm.createNotificationChannel(channel)
-            Log.d("PollingService", "Notification channel created with HIGH importance")
+            Log.d("PollingService", "Foreground notification channel ensured")
         }
+    }
+
+    private fun getOrCreateAlertChannelId(): String {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return CHANNEL_ID
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val soundEnabled = prefs.getBoolean("sound_enabled", true)
+        val soundUriStr = prefs.getString("sound_uri", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString())
+        val suffix = if (soundEnabled && soundUriStr != null) ("snd_" + soundUriStr.hashCode().toString()) else "silent"
+        val alertChannelId = "${CHANNEL_ID}_alert_${suffix}"
+        val existing = nm.getNotificationChannel(alertChannelId)
+        if (existing == null) {
+            val channel = NotificationChannel(alertChannelId, "Passo KDS Alerts", NotificationManager.IMPORTANCE_HIGH)
+            channel.enableLights(true)
+            channel.enableVibration(true)
+            if (soundEnabled && soundUriStr != null) {
+                val audioAttrs = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                channel.setSound(Uri.parse(soundUriStr), audioAttrs)
+            } else {
+                channel.setSound(null, null)
+            }
+            nm.createNotificationChannel(channel)
+        }
+        return alertChannelId
     }
 
     private fun buildPrintBodyFromDispatch(dispatchJson: com.google.gson.JsonObject, job: OrderJob): String {
