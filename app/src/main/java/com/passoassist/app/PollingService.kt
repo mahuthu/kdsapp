@@ -80,74 +80,169 @@ class PollingService : Service() {
                     Log.i("PollingService", "poll ok, bytes=${body.length}")
                     if (body.isBlank()) return
                     try {
-                        // Try structured OrderJob list, then single object, then simple PrintJob list
-                        val ordersType = object : TypeToken<List<OrderJob>>() {}.type
-                        val orders: List<OrderJob>? = runCatching { gson.fromJson<List<OrderJob>>(body, ordersType) }.getOrNull()
-                        if (!orders.isNullOrEmpty()) {
-                            Log.i("PollingService", "parsed OrderJob list size=${orders.size}")
-                            orders.forEach { o ->
-                                val serial = o.InternalDispatchSerial ?: o.SalesOrderSerial ?: ""
-                                if (serial.isBlank()) return@forEach
-                                if (!hasPrinted(serial)) {
-                                    notifyNewJobs(1)
-                                    postPrintActionNotification(o)
-                                    val success = printer.printOrder(o)
-                                    markPrinted(serial)
-                                }
-                                if (!hasAcked(serial)) {
-                                    sendAck(baseUrl, serial, true)
+                        // Try to parse the new JSON format with Dispatch keys first
+                        val jsonObject = gson.fromJson(body, com.google.gson.JsonObject::class.java)
+                        val dispatches = mutableListOf<Pair<OrderJob, String>>()
+                        
+                        // Debug: Log the JSON structure
+                        Log.d("PollingService", "JSON keys: ${jsonObject.keySet()}")
+                        
+                        // Extract all dispatch objects
+                        jsonObject.entrySet().forEach { entry ->
+                            if (entry.key.startsWith("Dispatch")) {
+                                Log.d("PollingService", "Processing ${entry.key}, value type: ${entry.value.javaClass.simpleName}")
+                                if (entry.value.isJsonObject) {
+                                    val dispatchJson = entry.value.asJsonObject
+                                    val orderJob = parseDispatchToOrderJob(dispatchJson)
+                                    if (orderJob != null) {
+                                        val bodyText = buildPrintBodyFromDispatch(dispatchJson, orderJob)
+                                        dispatches.add(orderJob to bodyText)
+                                    }
+                                } else {
+                                    Log.w("PollingService", "Dispatch ${entry.key} is not a JSON object: ${entry.value}")
                                 }
                             }
-                        } else if (body.trimStart().startsWith("{")) {
-                            val single: OrderJob? = runCatching { gson.fromJson(body, OrderJob::class.java) }.getOrNull()
-                            if (single != null) {
-                                Log.i("PollingService", "parsed single OrderJob")
-                                val serial = single.InternalDispatchSerial ?: single.SalesOrderSerial ?: ""
-                                if (serial.isBlank()) return@use
+                        }
+                        
+                        if (dispatches.isNotEmpty()) {
+                            Log.i("PollingService", "parsed ${dispatches.size} dispatch jobs")
+                            dispatches.forEach { (orderJob, bodyText) ->
+                                val serial = orderJob.InternalDispatchSerial ?: orderJob.SalesOrderSerial ?: ""
+                                if (serial.isBlank()) return@forEach
+                                
+                                // Only notify if we haven't seen this job before
                                 if (!hasPrinted(serial)) {
                                     notifyNewJobs(1)
-                                    postPrintActionNotification(single)
-                                    val success = printer.printOrder(single)
+                                    postPrintActionNotification(orderJob, bodyText)
                                     markPrinted(serial)
                                 }
-                                if (!hasAcked(serial)) {
-                                    sendAck(baseUrl, serial, true)
-                                }
+                                // Note: Acknowledgment will be sent by PrintActivity after user prints
                             }
                         } else {
-                            val listType = object : TypeToken<List<PrintJob>>() {}.type
-                            val jobs: List<PrintJob> = gson.fromJson(body, listType) ?: emptyList()
-                            Log.i("PollingService", "parsed simple jobs size=${jobs.size}")
-                            if (jobs.isEmpty()) return
-                            jobs.forEach { job ->
-                                val serial = job.internaldispatchserial
-                                if (!hasPrinted(serial)) {
-                                    notifyNewJobs(1)
-                                    postPrintActionNotification(
-                                        OrderJob(
-                                            SalesOrderSerial = serial,
-                                            PersonnelName = null,
-                                            InternalDispatchSerial = serial,
-                                            SequenceNumber = null,
-                                            AddedTime = null,
-                                            BranchName = getString(R.string.app_name),
-                                            ItemsCount = 1,
-                                            StatusTitle = StatusTitle(null, job.content, null, 1, null, null)
-                                        )
-                                    )
-                                    val success = printer.print(job)
-                                    markPrinted(serial)
+                            // Fallback to original parsing logic for backward compatibility
+                            val ordersType = object : TypeToken<List<OrderJob>>() {}.type
+                            val orders: List<OrderJob>? = runCatching { gson.fromJson<List<OrderJob>>(body, ordersType) }.getOrNull()
+                            if (!orders.isNullOrEmpty()) {
+                                Log.i("PollingService", "parsed OrderJob list size=${orders.size}")
+                                orders.forEach { o ->
+                                    val serial = o.InternalDispatchSerial ?: o.SalesOrderSerial ?: ""
+                                    if (serial.isBlank()) return@forEach
+                                    if (!hasPrinted(serial)) {
+                                        notifyNewJobs(1)
+                                        postPrintActionNotification(o)
+                                        val success = printer.printOrder(o)
+                                        markPrinted(serial)
+                                    }
+                                    if (!hasAcked(serial)) {
+                                        sendAck(baseUrl, serial, true)
+                                    }
                                 }
-                                if (!hasAcked(serial)) {
-                                    sendAck(baseUrl, serial, true)
+                            } else if (body.trimStart().startsWith("{")) {
+                                val single: OrderJob? = runCatching { gson.fromJson(body, OrderJob::class.java) }.getOrNull()
+                                if (single != null) {
+                                    Log.i("PollingService", "parsed single OrderJob")
+                                    val serial = single.InternalDispatchSerial ?: single.SalesOrderSerial ?: ""
+                                    if (serial.isBlank()) return@use
+                                    if (!hasPrinted(serial)) {
+                                        notifyNewJobs(1)
+                                        postPrintActionNotification(single)
+                                        val success = printer.printOrder(single)
+                                        markPrinted(serial)
+                                    }
+                                    if (!hasAcked(serial)) {
+                                        sendAck(baseUrl, serial, true)
+                                    }
+                                }
+                            } else {
+                                val listType = object : TypeToken<List<PrintJob>>() {}.type
+                                val jobs: List<PrintJob> = gson.fromJson(body, listType) ?: emptyList()
+                                Log.i("PollingService", "parsed simple jobs size=${jobs.size}")
+                                if (jobs.isEmpty()) return
+                                jobs.forEach { job ->
+                                    val serial = job.internaldispatchserial
+                                    if (!hasPrinted(serial)) {
+                                        notifyNewJobs(1)
+                                        postPrintActionNotification(
+                                            OrderJob(
+                                                SalesOrderSerial = serial,
+                                                PersonnelName = null,
+                                                InternalDispatchSerial = serial,
+                                                SequenceNumber = null,
+                                                AddedTime = null,
+                                                BranchName = getString(R.string.app_name),
+                                                ItemsCount = 1,
+                                                StatusTitle = StatusTitle(null, job.content, null, 1, null, null)
+                                            )
+                                        )
+                                        val success = printer.print(job)
+                                        markPrinted(serial)
+                                    }
+                                    if (!hasAcked(serial)) {
+                                        sendAck(baseUrl, serial, true)
+                                    }
                                 }
                             }
                         }
                         failureStreak.set(0)
-                    } catch (_: Exception) { }
+                    } catch (e: Exception) {
+                        Log.e("PollingService", "Error parsing jobs: ${e.message}", e)
+                    }
                 }
             }
         })
+    }
+
+    private fun parseDispatchToOrderJob(dispatchJson: com.google.gson.JsonObject): OrderJob? {
+        return try {
+            val salesOrderSerial = dispatchJson.get("SalesOrderSerial")?.asString
+            val personnelName = dispatchJson.get("PersonnelName")?.asString
+            val internalDispatchSerial = dispatchJson.get("InternalDispatchSerial")?.asString
+            val sequenceNumber = dispatchJson.get("SequenceNumber")?.asString
+            val addedTime = dispatchJson.get("AddedTime")?.asString
+            val branchName = dispatchJson.get("BranchName")?.asString
+            val itemsCount = dispatchJson.get("ItemsCount")?.asInt ?: 0
+            val statusTitle = dispatchJson.get("StatusTitle")?.asString
+            
+            // Build item list from Item X entries
+            val items = mutableListOf<StatusTitle>()
+            dispatchJson.entrySet().forEach { entry ->
+                if (entry.key.startsWith("Item")) {
+                    // Check if the value is a JSON object before trying to parse it
+                    if (entry.value.isJsonObject) {
+                        val itemJson = entry.value.asJsonObject
+                        val item = StatusTitle(
+                            Description = itemJson.get("Description")?.asString,
+                            ProductName = itemJson.get("ProductName")?.asString,
+                            OptionalProducts = itemJson.get("OptionalProducts")?.asString,
+                            Quantity = itemJson.get("Quantity")?.asInt ?: 1,
+                            ProductDescription = itemJson.get("ProductDescription")?.asString,
+                            OptionsQuantity = itemJson.get("OptionsQuantity")?.asString
+                        )
+                        items.add(item)
+                    } else {
+                        // Handle non-object values (like numbers) - skip them
+                        Log.d("PollingService", "Skipping non-object Item entry: ${entry.key} = ${entry.value}")
+                    }
+                }
+            }
+            
+            // Use first item as primary item for display
+            val primaryItem = items.firstOrNull()
+            
+            OrderJob(
+                SalesOrderSerial = salesOrderSerial,
+                PersonnelName = personnelName,
+                InternalDispatchSerial = internalDispatchSerial,
+                SequenceNumber = sequenceNumber,
+                AddedTime = addedTime,
+                BranchName = branchName,
+                ItemsCount = itemsCount,
+                StatusTitle = primaryItem
+            )
+        } catch (e: Exception) {
+            Log.e("PollingService", "Error parsing dispatch item: ${e.message}", e)
+            null
+        }
     }
 
     private fun handleFailure() {
@@ -179,6 +274,7 @@ class PollingService : Service() {
         })
     }
 
+    
     private fun notifyNewJobs(count: Int) {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val soundUri = prefs.getString("sound_uri", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString())
@@ -194,28 +290,33 @@ class PollingService : Service() {
         nm.notify(2, builder.build())
     }
 
-    private fun postPrintActionNotification(order: OrderJob) {
+    private fun postPrintActionNotification(order: OrderJob, bodyOverride: String? = null) {
         val title = (order.BranchName ?: getString(R.string.app_name)).ifBlank { getString(R.string.app_name) }
         val name = order.StatusTitle?.ProductName?.ifBlank { null } ?: "Order"
         val qty = order.StatusTitle?.Quantity ?: order.ItemsCount ?: 1
-        val body = buildString {
+        val serial = order.InternalDispatchSerial ?: order.SalesOrderSerial ?: ""
+        val body = bodyOverride ?: buildString {
             append(name).append(" x").append(qty)
-            val serial = order.InternalDispatchSerial ?: order.SalesOrderSerial
-            if (!serial.isNullOrBlank()) append("  (#").append(serial).append(")")
+            if (!serial.isBlank()) append("  (#").append(serial).append(")")
         }
 
-        val intent = PrintActivity.createIntent(this, title, body)
-        val pi = PendingIntent.getActivity(this, (System.currentTimeMillis() % Int.MAX_VALUE).toInt(), intent, PendingIntent.FLAG_IMMUTABLE)
+        Log.d("PollingService", "Creating notification for serial: $serial, title: $title, body: $body")
+
+        val intent = PrintActivity.createIntent(this, title, body, serial)
+        val pi = PendingIntent.getActivity(this, serial.hashCode(), intent, PendingIntent.FLAG_IMMUTABLE)
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
-            .setContentText(body)
-            .addAction(0, "Print", pi)
+            .setContentText("Tap to print: $body")
+            .setContentIntent(pi) // Make the entire notification clickable
+            .addAction(0, "Print", pi) // Keep the action button as well
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-        nm.notify((System.currentTimeMillis() % Int.MAX_VALUE).toInt(), builder.build())
+        nm.notify(serial.hashCode(), builder.build())
+        
+        Log.d("PollingService", "Notification posted with ID: ${serial.hashCode()}")
     }
 
     private fun buildNotification(text: String, soundUri: String? = null): Notification {
@@ -237,10 +338,42 @@ class PollingService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "Passo KDS", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(CHANNEL_ID, "Passo KDS", NotificationManager.IMPORTANCE_HIGH)
+            channel.enableLights(true)
+            channel.enableVibration(true)
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.createNotificationChannel(channel)
+            Log.d("PollingService", "Notification channel created with HIGH importance")
         }
+    }
+
+    private fun buildPrintBodyFromDispatch(dispatchJson: com.google.gson.JsonObject, job: OrderJob): String {
+        val header = buildString {
+            val branch = job.BranchName ?: ""
+            if (branch.isNotBlank()) append(branch).append('\n')
+            val time = (job.AddedTime ?: "").replace('T', ' ').substringBefore('.')
+            if (time.isNotBlank()) append("Time: ").append(time).append('\n')
+            append("Order: ").append(job.SalesOrderSerial.orEmpty())
+            append("   Seq: ").append(job.SequenceNumber.orEmpty())
+            append("   Disp: ").append(job.InternalDispatchSerial.orEmpty())
+        }
+
+        val items = mutableListOf<String>()
+        dispatchJson.entrySet().forEach { entry ->
+            if (entry.key.startsWith("Item") && entry.value.isJsonObject) {
+                val it = entry.value.asJsonObject
+                val name = it.get("ProductName")?.asString?.trim().orEmpty()
+                val qty = it.get("Quantity")?.asInt ?: 1
+                if (name.isNotEmpty()) items.add("$name x$qty")
+            }
+        }
+        val body = StringBuilder()
+        body.append(header)
+        if (items.isNotEmpty()) {
+            body.append('\n')
+            items.forEach { line -> body.append(line).append('\n') }
+        }
+        return body.toString().trimEnd()
     }
 
     private fun hasPrinted(serial: String): Boolean = seenPrinted.contains(serial)
