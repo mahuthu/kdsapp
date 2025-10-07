@@ -29,14 +29,15 @@ class PollingService : Service() {
     private val gson = Gson()
     private var timer: Timer? = null
     private val failureStreak = AtomicInteger(0)
-    private val seenSerials: MutableSet<String> = java.util.Collections.synchronizedSet(mutableSetOf())
+    private val seenPrinted: MutableSet<String> = java.util.Collections.synchronizedSet(mutableSetOf())
+    private val seenAcked: MutableSet<String> = java.util.Collections.synchronizedSet(mutableSetOf())
 
     override fun onCreate() {
         super.onCreate()
         prefs = getSharedPreferences("PassoAssistPrefs", Context.MODE_PRIVATE)
         api = ApiClient.getInstance(this)
         printer = PrinterManager(this)
-        loadSeenSerials()
+        loadSeenState()
         createNotificationChannel()
         startForeground(1, buildNotification("Waiting for jobs"))
     }
@@ -84,27 +85,33 @@ class PollingService : Service() {
                         val orders: List<OrderJob>? = runCatching { gson.fromJson<List<OrderJob>>(body, ordersType) }.getOrNull()
                         if (!orders.isNullOrEmpty()) {
                             Log.i("PollingService", "parsed OrderJob list size=${orders.size}")
-                            val newOrders = orders.filter { (it.InternalDispatchSerial ?: it.SalesOrderSerial).isNullOrBlank().not() }
-                                .filter { isNewSerial((it.InternalDispatchSerial ?: it.SalesOrderSerial)!!) }
-                            if (newOrders.isNotEmpty()) notifyNewJobs(newOrders.size)
-                            newOrders.forEach { o ->
+                            orders.forEach { o ->
                                 val serial = o.InternalDispatchSerial ?: o.SalesOrderSerial ?: ""
-                                postPrintActionNotification(o)
-                                val success = printer.printOrder(o)
-                                if (serial.isNotBlank()) sendAck(baseUrl, serial, success)
-                                markSeen(serial)
+                                if (serial.isBlank()) return@forEach
+                                if (!hasPrinted(serial)) {
+                                    notifyNewJobs(1)
+                                    postPrintActionNotification(o)
+                                    val success = printer.printOrder(o)
+                                    markPrinted(serial)
+                                }
+                                if (!hasAcked(serial)) {
+                                    sendAck(baseUrl, serial, true)
+                                }
                             }
                         } else if (body.trimStart().startsWith("{")) {
                             val single: OrderJob? = runCatching { gson.fromJson(body, OrderJob::class.java) }.getOrNull()
                             if (single != null) {
                                 Log.i("PollingService", "parsed single OrderJob")
                                 val serial = single.InternalDispatchSerial ?: single.SalesOrderSerial ?: ""
-                                if (serial.isNotBlank() && isNewSerial(serial)) {
+                                if (serial.isBlank()) return@use
+                                if (!hasPrinted(serial)) {
                                     notifyNewJobs(1)
                                     postPrintActionNotification(single)
                                     val success = printer.printOrder(single)
-                                    sendAck(baseUrl, serial, success)
-                                    markSeen(serial)
+                                    markPrinted(serial)
+                                }
+                                if (!hasAcked(serial)) {
+                                    sendAck(baseUrl, serial, true)
                                 }
                             }
                         } else {
@@ -112,24 +119,28 @@ class PollingService : Service() {
                             val jobs: List<PrintJob> = gson.fromJson(body, listType) ?: emptyList()
                             Log.i("PollingService", "parsed simple jobs size=${jobs.size}")
                             if (jobs.isEmpty()) return
-                            val newJobs = jobs.filter { isNewSerial(it.internaldispatchserial) }
-                            if (newJobs.isNotEmpty()) notifyNewJobs(newJobs.size)
-                            newJobs.forEach { job ->
-                                postPrintActionNotification(
-                                    OrderJob(
-                                        SalesOrderSerial = job.internaldispatchserial,
-                                        PersonnelName = null,
-                                        InternalDispatchSerial = job.internaldispatchserial,
-                                        SequenceNumber = null,
-                                        AddedTime = null,
-                                        BranchName = getString(R.string.app_name),
-                                        ItemsCount = 1,
-                                        StatusTitle = StatusTitle(null, job.content, null, 1, null, null)
+                            jobs.forEach { job ->
+                                val serial = job.internaldispatchserial
+                                if (!hasPrinted(serial)) {
+                                    notifyNewJobs(1)
+                                    postPrintActionNotification(
+                                        OrderJob(
+                                            SalesOrderSerial = serial,
+                                            PersonnelName = null,
+                                            InternalDispatchSerial = serial,
+                                            SequenceNumber = null,
+                                            AddedTime = null,
+                                            BranchName = getString(R.string.app_name),
+                                            ItemsCount = 1,
+                                            StatusTitle = StatusTitle(null, job.content, null, 1, null, null)
+                                        )
                                     )
-                                )
-                                val success = printer.print(job)
-                                sendAck(baseUrl, job.internaldispatchserial, success)
-                                markSeen(job.internaldispatchserial)
+                                    val success = printer.print(job)
+                                    markPrinted(serial)
+                                }
+                                if (!hasAcked(serial)) {
+                                    sendAck(baseUrl, serial, true)
+                                }
                             }
                         }
                         failureStreak.set(0)
@@ -149,15 +160,20 @@ class PollingService : Service() {
 
     private fun sendAck(baseUrl: String, serial: String, success: Boolean) {
         val ackUrl = HttpUrlHelper.join(baseUrl, "/kictchen/endpoints/update_kds_print.jsp")
-        val payload = AckResponse(if (success) "success" else "failure", serial)
-        val json = gson.toJson(payload)
-        Log.i("PollingService", "ack -> $ackUrl body=$json")
-        api.postJson(ackUrl, json).enqueue(object : Callback {
+        val params = mapOf(
+            "action" to "update",
+            "internalDispatchSerial" to serial
+        )
+        Log.i("PollingService", "ack(form) -> $ackUrl params=$params")
+        api.postForm(ackUrl, params).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Log.w("PollingService", "ack failed: ${e.message}")
             }
             override fun onResponse(call: Call, response: Response) {
                 Log.i("PollingService", "ack <- code=${response.code}")
+                if (response.isSuccessful) {
+                    markAcked(serial)
+                }
                 response.close()
             }
         })
@@ -227,35 +243,48 @@ class PollingService : Service() {
         }
     }
 
-    private fun isNewSerial(serial: String): Boolean {
-        return !seenSerials.contains(serial)
+    private fun hasPrinted(serial: String): Boolean = seenPrinted.contains(serial)
+    private fun hasAcked(serial: String): Boolean = seenAcked.contains(serial)
+
+    private fun markPrinted(serial: String) {
+        seenPrinted.add(serial)
+        persistSeenState()
     }
 
-    private fun markSeen(serial: String) {
-        seenSerials.add(serial)
-        persistSeenSerials()
+    private fun markAcked(serial: String) {
+        seenAcked.add(serial)
+        persistSeenState()
     }
 
-    private fun loadSeenSerials() {
-        val csv = prefs.getString("seen_serials", null) ?: return
-        csv.split(',').map { it.trim() }.filter { it.isNotEmpty() }.forEach { seenSerials.add(it) }
-        // keep only last 200 serials to bound storage
+    private fun loadSeenState() {
+        prefs.getString("seen_printed", null)?.let { csv ->
+            csv.split(',').map { it.trim() }.filter { it.isNotEmpty() }.forEach { seenPrinted.add(it) }
+        }
+        prefs.getString("seen_acked", null)?.let { csv ->
+            csv.split(',').map { it.trim() }.filter { it.isNotEmpty() }.forEach { seenAcked.add(it) }
+        }
         trimSeen()
     }
 
-    private fun persistSeenSerials() {
+    private fun persistSeenState() {
         trimSeen()
-        prefs.edit().putString("seen_serials", seenSerials.joinToString(",")).apply()
+        prefs.edit()
+            .putString("seen_printed", seenPrinted.joinToString(","))
+            .putString("seen_acked", seenAcked.joinToString(","))
+            .apply()
     }
 
     private fun trimSeen() {
-        if (seenSerials.size > 200) {
-            // naive trim: keep latest by insertion order not guaranteed for HashSet, so rebuild from last 200 of list
-            val list = seenSerials.toList()
-            val last = list.drop(list.size - 200)
-            seenSerials.clear()
-            seenSerials.addAll(last)
+        fun trim(set: MutableSet<String>) {
+            if (set.size > 200) {
+                val list = set.toList()
+                val last = list.drop(list.size - 200)
+                set.clear()
+                set.addAll(last)
+            }
         }
+        trim(seenPrinted)
+        trim(seenAcked)
     }
 
     companion object {

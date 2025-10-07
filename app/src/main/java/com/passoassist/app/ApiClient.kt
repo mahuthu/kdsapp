@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.FormBody
 import java.util.concurrent.TimeUnit
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -35,6 +36,13 @@ class ApiClient private constructor(context: Context) {
         Request.Builder()
             .url(url)
             .post(json.toRequestBody("application/json; charset=utf-8".toMediaType()))
+            .build()
+    )
+
+    fun postForm(url: String, params: Map<String, String>) = client.newCall(
+        Request.Builder()
+            .url(url)
+            .post(FormBody.Builder().apply { params.forEach { (k, v) -> add(k, v) } }.build())
             .build()
     )
 
